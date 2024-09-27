@@ -1,29 +1,35 @@
+// server.js
+
 const express = require('express');
+const cookieParser = require('cookie-parser');
 const { Pool } = require('pg');
 require('dotenv').config();
 
+// Initialize Express App
 const app = express();
+
+// Configure Express to Trust Proxies
+app.set('trust proxy', 1); // Trust the first proxy (adjust if multiple proxies)
+
+// Middleware
 app.use(express.json());
+app.use(cookieParser(process.env.COOKIE_SECRET));
 
-const pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
-});
-
-pool.connect((err) => {
-    if (err) {
-        console.error('Database connection error', err.stack);
-    } else {
-        console.log('Database connected');
-    }
-});
-
-// Get the domain from the .env file
-const DOMAIN = process.env.DOMAIN;
-
-// Auth routes
+// Import Routes
 const authRoutes = require('./routes/auth');
-app.use('/auth', authRoutes);
+const linkRoutes = require('./routes/link');
 
-app.listen(3000, () => {
+// Apply Routes
+app.use('/auth', authRoutes);
+app.use('/links', linkRoutes);
+
+// Catch-all Route for Redirection (Should be after other routes)
+app.get('/:shortCode', require('./controllers/linkController').redirectToLongUrl);
+
+// Start the Server
+const PORT = process.env.PORT || 3000;
+const DOMAIN = process.env.DOMAIN || `http://localhost:${PORT}`;
+
+app.listen(PORT, () => {
     console.log(`Server is running on ${DOMAIN}`);
 });
