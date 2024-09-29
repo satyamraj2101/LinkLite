@@ -4,9 +4,9 @@
 
 Welcome to **LINK LITE**, a **lightweight** and **secure** URL shortening service built with **Node.js** and **PostgreSQL**. Effortlessly create, manage, and track short links with comprehensive analytics. Whether you're sharing links on social media, emails, or your website, LINK LITE ensures your URLs are concise and insightful.
 
-![Docker Image Size](https://img.shields.io/docker/image-size/yourusername/linklite/latest?style=for-the-badge)
-![Docker Pulls](https://img.shields.io/docker/pulls/yourusername/linklite?style=for-the-badge)
-![License](https://img.shields.io/github/license/yourusername/linklite?style=for-the-badge)
+![Docker Image Size](https://img.shields.io/docker/image-size/satyamraj620/linklite/latest?style=for-the-badge)
+![Docker Pulls](https://img.shields.io/docker/pulls/satyamraj620/linklite?style=for-the-badge)
+![License](https://img.shields.io/github/license/satyamraj620/linklite?style=for-the-badge)
 
 ---
 
