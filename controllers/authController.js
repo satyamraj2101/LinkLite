@@ -1,14 +1,10 @@
 // controllers/authController.js
 
-const { Pool } = require('pg');
+const pool = require('../config/db'); // Import the centralized pool
 const bcrypt = require('bcrypt'); // For password hashing
 const jwt = require('jsonwebtoken');
 const { validationResult } = require('express-validator');
 require('dotenv').config();
-
-const pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
-});
 
 // User Repository (Database Queries)
 const userRepository = {

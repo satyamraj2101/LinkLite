@@ -1,16 +1,13 @@
 // controllers/linkController.js
 
+const pool = require('../config/db'); // Import the centralized pool
 const geoip = require('geoip-lite');
 const UAParser = require('ua-parser-js');
-const { Pool } = require('pg');
 const generateShortCode = require('../utils/generateShortCode');
 const { validationResult } = require('express-validator');
 require('dotenv').config();
 
-// Initialize PostgreSQL Pool
-const pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
-});
+
 
 // Link Repository
 const linkRepository = {
