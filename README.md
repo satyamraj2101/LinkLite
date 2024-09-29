@@ -71,7 +71,7 @@ Follow these steps to get your **LINK LITE** application up and running locally.
 1. **Clone the Repository**
 
     ```bash
-    git clone https://github.com/yourusername/linklite.git
+    git clone https://github.com/satyamraj2101/linklite.git
     cd linklite
     ```
 
@@ -158,4 +158,4 @@ Containerize your application for consistent environments and easier deployments
 Ensure Docker is installed and running on your machine.
 
 ```bash
-docker build -t yourusername/linklite:latest .
+docker build -t satyamraj620/linklite:latest .
