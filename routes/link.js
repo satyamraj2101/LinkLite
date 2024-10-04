@@ -29,6 +29,10 @@ router.post(
             .isISO8601()
             .toDate()
             .withMessage('Expiry must be a valid ISO 8601 date'),
+        body('imageUrl') // Added imageUrl validation
+            .optional()
+            .isURL()
+            .withMessage('Please provide a valid image URL'),
     ],
     createShortLink
 );

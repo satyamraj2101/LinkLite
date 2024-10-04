@@ -1,10 +1,10 @@
-version: '3.8'
+version: "1.0.0"
 
 services:
   app:
     build: .
     ports:
-      - '3000:3000' # Adjust to your app's port
+      - '3000:3000'
     environment:
       - DB_USER=${DB_USER}
       - DB_PASSWORD=${DB_PASSWORD}

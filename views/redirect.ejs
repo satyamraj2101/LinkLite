@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Dynamic OG tags -->
+    <meta property="og:title" content="<%= ogTitle %>" />
+    <meta property="og:description" content="<%= ogDescription %>" />
+    <meta property="og:image" content="<%= ogImage %>" />
+
+    <title>Redirecting...</title>
+
+    <!-- Redirect after short delay -->
+    <script type="text/javascript">
+        setTimeout(function() {
+            window.location.href = "<%= longUrl %>";
+        }, 2000); // Delay of 2 seconds before redirecting
+    </script>
+</head>
+<body>
+<h1>Redirecting to the long URL...</h1>
+<p>If you're not redirected automatically, <a href="<%= longUrl %>">click here</a>.</p>
+</body>
+</html>
+
+
+
+
+
+

@@ -7,8 +7,6 @@ const generateShortCode = require('../utils/generateShortCode');
 const { validationResult } = require('express-validator');
 require('dotenv').config();
 
-
-
 // Link Repository
 const linkRepository = {
     /**
@@ -17,16 +15,17 @@ const linkRepository = {
      * @param {string} shortCode - The unique short code.
      * @param {string} name - Optional name for the link.
      * @param {Date} expiry - Optional expiry date.
+     * @param {string} imageUrl - Optional image URL.
      * @param {number} userId - ID of the user creating the link.
      * @returns {Promise<Object>} The created link.
      */
-    async createLink(longUrl, shortCode, name, expiry, userId) {
+    async createLink(longUrl, shortCode, name, expiry, imageUrl, userId) { // Added imageUrl
         const query = `
-            INSERT INTO links (long_url, short_code, name, expiry, created_by)
-            VALUES ($1, $2, $3, $4, $5)
-            RETURNING *
+            INSERT INTO links (long_url, short_code, name, expiry, image_url, created_by)
+            VALUES ($1, $2, $3, $4, $5, $6)
+                RETURNING *
         `;
-        const values = [longUrl, shortCode, name, expiry, userId];
+        const values = [longUrl, shortCode, name, expiry, imageUrl, userId]; // Include imageUrl
         const result = await pool.query(query, values);
         return result.rows[0];
     },
@@ -125,11 +124,11 @@ const linkAnalyticsRepository = {
         const { startDate, endDate, limit = 100, offset = 0 } = options;
 
         const baseQuery = `
-            SELECT 
+            SELECT
                 id, clicked_at, ip_address, user_agent, referrer, country, region, city, latitude, longitude, device_type, browser, os
-            FROM 
+            FROM
                 link_analytics
-            WHERE 
+            WHERE
                 link_id = $1
         `;
         const countQuery = `
@@ -173,7 +172,7 @@ exports.createShortLink = async (req, res) => {
         return res.status(400).json({ errors: errors.array() });
     }
 
-    const { longUrl, name, expiry } = req.body;
+    const { longUrl, name, expiry, imageUrl } = req.body; // Include imageUrl
     const userId = req.user.id;
 
     try {
@@ -188,8 +187,8 @@ exports.createShortLink = async (req, res) => {
             }
         }
 
-        // Create the link
-        const newLink = await linkRepository.createLink(longUrl, shortCode, name, expiry, userId);
+        // Create the link with imageUrl
+        const newLink = await linkRepository.createLink(longUrl, shortCode, name, expiry, imageUrl, userId);
 
         res.status(201).json({
             message: 'Short link created successfully',
@@ -199,6 +198,7 @@ exports.createShortLink = async (req, res) => {
                 shortCode: newLink.short_code,
                 name: newLink.name,
                 expiry: newLink.expiry,
+                imageUrl: newLink.image_url, // Include imageUrl in the response
                 createdAt: newLink.created_at,
             },
         });
@@ -228,6 +228,7 @@ exports.getUserLinks = async (req, res) => {
                 shortCode: link.short_code,
                 name: link.name,
                 expiry: link.expiry,
+                imageUrl: link.image_url, // Include imageUrl
                 createdAt: link.created_at,
             })),
         });
@@ -278,8 +279,21 @@ exports.redirectToLongUrl = async (req, res) => {
         linkAnalyticsRepository.logClick(link.id, ipAddress, userAgent, referrer).catch(error => {
             console.error('Error logging click:', error);
         });
+        const urlData = {
+            longUrl: link.long_url, // Replace with your logic
+            ogTitle: link.name, // Dynamic OG title
+            ogDescription: 'This is a sample description. You can take in description while creating short link so that it can be displayed while sharing', // Dynamic OG description
+            ogImage: link.image_url
+        };
 
-        res.redirect(link.long_url);
+        // Render the template and pass dynamic values
+        res.render('redirect', {
+            longUrl: urlData.longUrl,
+            ogTitle: urlData.ogTitle,
+            ogDescription: urlData.ogDescription,
+            ogImage: urlData.ogImage
+        });
+        // res.redirect(link.long_url);
     } catch (error) {
         console.error('Error during redirection:', error);
         res.status(500).json({ message: 'Server error' });
