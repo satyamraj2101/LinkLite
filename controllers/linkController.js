@@ -10,22 +10,48 @@ require('dotenv').config();
 // Link Repository
 const linkRepository = {
     /**
-     * Creates a new short link.
-     * @param {string} longUrl - The original long URL.
-     * @param {string} shortCode - The unique short code.
-     * @param {string} name - Optional name for the link.
-     * @param {Date} expiry - Optional expiry date.
-     * @param {string} imageUrl - Optional image URL.
-     * @param {number} userId - ID of the user creating the link.
+     * Creates a new short link with optional custom short code and device-specific URLs.
+     * @param {Object} params - Parameters for link creation.
+     * @param {string} params.longUrlDesktop - Desktop long URL.
+     * @param {string} [params.longUrlMobile] - Mobile long URL (optional).
+     * @param {string} params.shortCode - Short code (custom or generated).
+     * @param {string} [params.name] - Optional name for the link.
+     * @param {Date} [params.expiry] - Optional expiry date.
+     * @param {string} [params.imageUrl] - Optional image URL.
+     * @param {number} params.userId - ID of the user creating the link.
      * @returns {Promise<Object>} The created link.
      */
-    async createLink(longUrl, shortCode, name, expiry, imageUrl, userId) { // Added imageUrl
+    async createLink({
+                         longUrlDesktop,
+                         longUrlMobile = null,
+                         shortCode,
+                         name = null,
+                         expiry = null,
+                         imageUrl = null,
+                         userId
+                     }) {
         const query = `
-            INSERT INTO links (long_url, short_code, name, expiry, image_url, created_by)
-            VALUES ($1, $2, $3, $4, $5, $6)
+            INSERT INTO links (
+                long_url_desktop,
+                long_url_mobile,
+                short_code,
+                name,
+                expiry,
+                image_url,
+                created_by
+            )
+            VALUES ($1, $2, $3, $4, $5, $6, $7)
                 RETURNING *
         `;
-        const values = [longUrl, shortCode, name, expiry, imageUrl, userId]; // Include imageUrl
+        const values = [
+            longUrlDesktop,
+            longUrlMobile,
+            shortCode,
+            name,
+            expiry,
+            imageUrl,
+            userId
+        ];
         const result = await pool.query(query, values);
         return result.rows[0];
     },
@@ -91,6 +117,8 @@ const linkAnalyticsRepository = {
         const browser = `${browserName} ${browserVersion}`.trim() || 'Unknown';
         const os = `${osName} ${osVersion}`.trim() || 'Unknown';
 
+        const deviceType = uaResult.device.type || 'desktop'; // 'mobile', 'tablet', etc.
+
         const query = `
             INSERT INTO link_analytics (
                 link_id, ip_address, user_agent, referrer, country, region, city, latitude, longitude, device_type, browser, os
@@ -106,7 +134,7 @@ const linkAnalyticsRepository = {
             geo.city || null,
             geo.ll ? geo.ll[0] : null, // Latitude
             geo.ll ? geo.ll[1] : null, // Longitude
-            uaResult.device.type || 'desktop',
+            deviceType,
             browser,
             os,
         ];
@@ -160,7 +188,7 @@ const linkAnalyticsRepository = {
 };
 
 /**
- * Creates a new short link.
+ * Creates a new short link with optional custom short code and device-specific URLs.
  *
  * @param {Object} req - Express request object.
  * @param {Object} res - Express response object.
@@ -172,33 +200,63 @@ exports.createShortLink = async (req, res) => {
         return res.status(400).json({ errors: errors.array() });
     }
 
-    const { longUrl, name, expiry, imageUrl } = req.body; // Include imageUrl
+    const {
+        longUrlDesktop,
+        longUrlMobile,
+        shortCode, // Optional custom short code
+        name,
+        expiry,
+        imageUrl
+    } = req.body;
     const userId = req.user.id;
 
     try {
-        // Generate a unique short code
-        let shortCode;
-        let isUnique = false;
-        while (!isUnique) {
-            shortCode = generateShortCode(6);
+        let finalShortCode = shortCode;
+
+        if (shortCode) {
+            // Validate custom short code uniqueness
             const existingLink = await linkRepository.getLinkByShortCode(shortCode);
-            if (!existingLink) {
-                isUnique = true;
+            if (existingLink) {
+                return res.status(400).json({ message: 'Short code already in use' });
+            }
+        } else {
+            // Generate a unique short code
+            let isUnique = false;
+            while (!isUnique) {
+                finalShortCode = generateShortCode(6);
+                const existingLink = await linkRepository.getLinkByShortCode(finalShortCode);
+                if (!existingLink) {
+                    isUnique = true;
+                }
             }
         }
 
-        // Create the link with imageUrl
-        const newLink = await linkRepository.createLink(longUrl, shortCode, name, expiry, imageUrl, userId);
+        // Ensure at least longUrlDesktop is provided
+        if (!longUrlDesktop) {
+            return res.status(400).json({ message: 'Desktop URL is required' });
+        }
+
+        // Create the link with device-specific URLs
+        const newLink = await linkRepository.createLink({
+            longUrlDesktop,
+            longUrlMobile,
+            shortCode: finalShortCode,
+            name,
+            expiry,
+            imageUrl,
+            userId
+        });
 
         res.status(201).json({
             message: 'Short link created successfully',
             link: {
                 id: newLink.id,
-                longUrl: newLink.long_url,
+                longUrlDesktop: newLink.long_url_desktop,
+                longUrlMobile: newLink.long_url_mobile,
                 shortCode: newLink.short_code,
                 name: newLink.name,
                 expiry: newLink.expiry,
-                imageUrl: newLink.image_url, // Include imageUrl in the response
+                imageUrl: newLink.image_url,
                 createdAt: newLink.created_at,
             },
         });
@@ -224,11 +282,12 @@ exports.getUserLinks = async (req, res) => {
             totalLinks: links.length,
             links: links.map(link => ({
                 id: link.id,
-                longUrl: link.long_url,
+                longUrlDesktop: link.long_url_desktop,
+                longUrlMobile: link.long_url_mobile,
                 shortCode: link.short_code,
                 name: link.name,
                 expiry: link.expiry,
-                imageUrl: link.image_url, // Include imageUrl
+                imageUrl: link.image_url,
                 createdAt: link.created_at,
             })),
         });
@@ -239,7 +298,7 @@ exports.getUserLinks = async (req, res) => {
 };
 
 /**
- * Redirects to the original long URL based on the provided short code.
+ * Redirects to the appropriate long URL based on device type.
  * Logs analytics data.
  *
  * @param {Object} req - Express request object.
@@ -259,6 +318,29 @@ exports.redirectToLongUrl = async (req, res) => {
             return res.status(410).json({ message: 'Link has expired' });
         }
 
+        // Ensure at least one URL is present
+        if (!link.long_url_desktop && !link.long_url_mobile) {
+            return res.status(500).json({ message: 'No target URL configured for this link' });
+        }
+
+        // Detect device type
+        const userAgent = req.headers['user-agent'] || '';
+        const parser = new UAParser(userAgent);
+        const deviceType = parser.getDevice().type || 'desktop'; // Default to desktop
+
+        // Determine the appropriate long URL
+        let targetUrl;
+        if (deviceType === 'mobile' && link.long_url_mobile) {
+            targetUrl = link.long_url_mobile;
+        } else {
+            targetUrl = link.long_url_desktop;
+        }
+
+        // Fallback to desktop URL if mobile URL is not set
+        if (!targetUrl) {
+            targetUrl = link.long_url_desktop;
+        }
+
         // Retrieve the real IP address using req.ip
         let ipAddress = req.ip;
 
@@ -267,33 +349,32 @@ exports.redirectToLongUrl = async (req, res) => {
             ipAddress = '127.0.0.1';
         }
 
-        // Check if the IP is IPv4 or IPv6
-        const ipv4Regex = /^(25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)){3}$/;
-        const isIPv4 = ipv4Regex.test(ipAddress);
-        // If not IPv4, assume IPv6 and keep as is
-
-        const userAgent = req.headers['user-agent'] || 'Unknown';
         const referrer = req.get('Referrer') || req.get('Referer') || null;
 
         // Asynchronously log the click without blocking the redirection
         linkAnalyticsRepository.logClick(link.id, ipAddress, userAgent, referrer).catch(error => {
             console.error('Error logging click:', error);
         });
+
+        // Option 1: Redirect immediately
+        res.redirect(targetUrl);
+
+        // Option 2: Render a redirect page with OG tags (optional)
+        /*
         const urlData = {
-            longUrl: link.long_url, // Replace with your logic
-            ogTitle: link.name, // Dynamic OG title
-            ogDescription: 'This is a sample description. You can take in description while creating short link so that it can be displayed while sharing', // Dynamic OG description
+            longUrl: targetUrl,
+            ogTitle: link.name || 'Redirecting...',
+            ogDescription: 'This link redirects you to your destination.',
             ogImage: link.image_url
         };
 
-        // Render the template and pass dynamic values
         res.render('redirect', {
             longUrl: urlData.longUrl,
             ogTitle: urlData.ogTitle,
             ogDescription: urlData.ogDescription,
             ogImage: urlData.ogImage
         });
-        // res.redirect(link.long_url);
+        */
     } catch (error) {
         console.error('Error during redirection:', error);
         res.status(500).json({ message: 'Server error' });
