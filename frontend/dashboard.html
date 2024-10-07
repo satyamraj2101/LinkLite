@@ -1,0 +1,102 @@
+<!-- dashboard.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - URL Shortener</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<!-- Navigation -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+  <a class="navbar-brand" href="dashboard.html">
+    <img src="images/logo.png" width="30" height="30" alt="Logo">
+    URL Shortener
+  </a>
+  <div class="collapse navbar-collapse">
+    <ul class="navbar-nav ml-auto">
+      <li class="nav-item active">
+        <a class="nav-link" href="dashboard.html">Dashboard</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="analytics.html">Analytics</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="about.html">About Me</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="#" id="logoutBtn">Logout</a>
+      </li>
+    </ul>
+  </div>
+</nav>
+
+<!-- Dashboard Content -->
+<div class="container">
+  <h2 class="mt-5">Your Dashboard</h2>
+
+  <!-- Create Short Link Form -->
+  <div class="card">
+    <div class="card-header">
+      Create a New Short Link
+    </div>
+    <div class="card-body">
+      <form id="createLinkForm">
+        <div class="form-group">
+          <label for="longUrl">Long URL</label>
+          <input type="url" class="form-control" id="longUrl" placeholder="https://example.com" required>
+        </div>
+        <div class="form-group">
+          <label for="linkName">Link Name (Optional)</label>
+          <input type="text" class="form-control" id="linkName" placeholder="My Project">
+        </div>
+        <div class="form-group">
+          <label for="expiry">Expiry Date (Optional)</label>
+          <input type="date" class="form-control" id="expiry">
+        </div>
+        <button type="submit" class="btn btn-primary">Create Short Link</button>
+        <div id="createLinkMessage" class="mt-3"></div>
+      </form>
+    </div>
+  </div>
+
+  <!-- List of Shortened Links -->
+  <div class="card">
+    <div class="card-header">
+      Your Shortened Links
+    </div>
+    <div class="card-body">
+      <table class="table table-bordered" id="linksTable">
+        <thead>
+        <tr>
+          <th>Short URL</th>
+          <th>Long URL</th>
+          <th>Clicks</th>
+          <th>Created At</th>
+          <th>Expiry</th>
+          <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        <!-- Links will be dynamically populated here -->
+        </tbody>
+      </table>
+      <div id="linksMessage" class="mt-3"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Footer -->
+<footer>
+  <p>&copy; 2024 Your Name. All rights reserved.</p>
+</footer>
+
+<!-- Scripts -->
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="js/dashboard.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
