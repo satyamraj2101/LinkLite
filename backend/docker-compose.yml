@@ -1,0 +1,33 @@
+version: "3.8"  # Updated to a newer version for better features
+
+services:
+  app:
+    build: .  # Build the image from the Dockerfile in the current directory
+    ports:
+      - '3000:3000'  # Map port 3000 of the container to port 3000 of the host
+    environment:
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_NAME: ${DB_NAME}
+      JWT_SECRET: ${JWT_SECRET}
+      COOKIE_SECRET: ${COOKIE_SECRET}
+      DOMAIN: ${DOMAIN}
+      DB_SSL_CA: ${DB_SSL_CA}
+      NODE_ENV: ${NODE_ENV:-production}  # Default to production if NODE_ENV is not set
+    env_file:
+      - .env  # Load environment variables from .env file
+    restart: unless-stopped  # Restart policy
+    networks:
+      - my_network  # Connect to a custom network for better isolation
+    logging:  # Add logging configuration
+      driver: json-file
+      options:
+        max-size: "10m"  # Limit the log size
+        max-file: "3"    # Keep a maximum of 3 log files
+
+networks:
+  my_network:  # Define the custom network
+    driver: bridge  # Use the bridge driver for isolation
+
