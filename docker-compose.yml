@@ -1,0 +1,51 @@
+---
+
+version: '3.8'  # Optional: Can be omitted in newer Docker Compose versions
+
+services:
+  backend:
+    build: ./backend
+    container_name: linklite-backend
+    ports:
+      - '3000:3000'  # Exposes backend on host port 3000
+    environment:
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_NAME: ${DB_NAME}
+      JWT_SECRET: ${JWT_SECRET}
+      COOKIE_SECRET: ${COOKIE_SECRET}
+      DOMAIN: ${DOMAIN}
+      DB_SSL_CA: ${DB_SSL_CA}
+      NODE_ENV: ${NODE_ENV:-production}
+    env_file:
+      - ./backend/.env
+    restart: unless-stopped
+    networks:
+      - linklite_network
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  nginx:
+    build: ./nginx
+    container_name: linklite-nginx
+    depends_on:
+      - backend
+    ports:
+      - '80:80'
+      - '443:443'
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/sites-available/default.conf  # Mount the Nginx config
+      - ./frontend/:/usr/share/nginx/html/  # Mount the frontend static files
+      - /etc/letsencrypt:/etc/letsencrypt  # Mount Let's Encrypt certificates
+    networks:
+      - linklite_network
+    restart: unless-stopped
+
+networks:
+  linklite_network:
+    driver: bridge
