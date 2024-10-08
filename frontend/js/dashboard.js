@@ -1,5 +1,4 @@
-/* js/dashboard.js */
-
+// js/dashboard.js
 $(document).ready(function() {
   // Fetch and display user's links on page load
   fetchUserLinks();
@@ -7,7 +6,8 @@ $(document).ready(function() {
   // Handle Create Link Form Submission
   $('#createLinkForm').on('submit', function(e) {
     e.preventDefault();
-    const longUrl = $('#longUrl').val();
+    const longUrlDesktop = $('#longUrlDesktop').val();
+    const longUrlMobile = $('#longUrlMobile').val();
     const name = $('#linkName').val();
     const expiry = $('#expiry').val();
 
@@ -15,7 +15,7 @@ $(document).ready(function() {
       url: '/links/create',
       method: 'POST',
       contentType: 'application/json',
-      data: JSON.stringify({ longUrl, name, expiry }),
+      data: JSON.stringify({ longUrlDesktop, longUrlMobile, name, expiry }),
       success: function(response) {
         $('#createLinkMessage').html(`<p class="success">${response.message}</p>`);
         // Clear the form
@@ -47,17 +47,18 @@ $(document).ready(function() {
         let rows = '';
         links.forEach(link => {
           rows += `
-                        <tr>
-                            <td><a href="${link.shortCode}" target="_blank">${window.location.origin}/${link.shortCode}</a></td>
-                            <td><a href="${link.longUrl}" target="_blank">${link.longUrl}</a></td>
-                            <td>${link.clicks || 0}</td>
-                            <td>${new Date(link.createdAt).toLocaleString()}</td>
-                            <td>${link.expiry ? new Date(link.expiry).toLocaleDateString() : 'N/A'}</td>
-                            <td>
-                                <a href="analytics.html?linkId=${link.id}" class="btn btn-sm btn-info">View Analytics</a>
-                            </td>
-                        </tr>
-                    `;
+            <tr>
+              <td><a href="${link.shortCode}" target="_blank">${window.location.origin}/${link.shortCode}</a></td>
+              <td><a href="${link.longUrlDesktop}" target="_blank">${link.longUrlDesktop}</a></td>
+              <td><a href="${link.longUrlMobile || '#'}" target="_blank">${link.longUrlMobile || 'N/A'}</a></td>
+              <td>${link.clicks || 0}</td>
+              <td>${new Date(link.createdAt).toLocaleString()}</td>
+              <td>${link.expiry ? new Date(link.expiry).toLocaleDateString() : 'N/A'}</td>
+              <td>
+                  <a href="analytics.html?linkId=${link.id}" class="btn btn-sm btn-info">View Analytics</a>
+              </td>
+            </tr>
+          `;
         });
         $('#linksTable tbody').html(rows);
         $('#linksMessage').html('');
