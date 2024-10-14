@@ -1,49 +1,50 @@
-/* css/styles.css */
+/* frontend/css/styles.css */
 
-/* Import Bootstrap CSS */
-@import url('https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css');
-
-/* Custom Styles */
+/* Body Styling */
 body {
-  background-color: #f8f9fa;
+    background-color: #f8f9fa;
 }
 
-.navbar {
-  margin-bottom: 20px;
+/* Navbar Brand Styling */
+.navbar-brand {
+    font-weight: bold;
+    font-size: 1.5rem;
 }
 
-.container {
-  max-width: 800px;
+/* Active Nav Link */
+.nav-link.active {
+    color: #0d6efd !important;
+    font-weight: bold;
 }
 
+/* Footer Styling */
 footer {
-  margin-top: 40px;
-  padding: 20px 0;
-  background-color: #343a40;
-  color: #fff;
-  text-align: center;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
 }
 
-.card {
-  margin-bottom: 20px;
+/* Form Messages */
+#signupMessage, #loginMessage, #createLinkMessage, #profileMessage, #linksMessage, #dashboardMessage {
+    margin-bottom: 15px;
 }
 
-.btn-primary {
-  background-color: #007bff;
-  border-color: #007bff;
-}
-
-.btn-primary:hover {
-  background-color: #0056b3;
-  border-color: #004085;
-}
-
-.error {
-  color: red;
-  margin-top: 10px;
-}
-
+/* Success Message */
 .success {
-  color: green;
-  margin-top: 10px;
+    color: green;
+}
+
+/* Error Message */
+.error {
+    color: red;
+}
+
+/* Table Styling */
+table th, table td {
+    vertical-align: middle;
+}
+
+/* Modal Input Styling */
+.modal .form-control {
+    border-radius: 0.25rem;
 }

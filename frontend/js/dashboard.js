@@ -1,74 +1,87 @@
-// js/dashboard.js
 $(document).ready(function() {
-  // Fetch and display user's links on page load
-  fetchUserLinks();
+    // Fetch and display user's links on page load
+    fetchUserLinks();
 
-  // Handle Create Link Form Submission
-  $('#createLinkForm').on('submit', function(e) {
-    e.preventDefault();
-    const longUrlDesktop = $('#longUrlDesktop').val();
-    const longUrlMobile = $('#longUrlMobile').val();
-    const name = $('#linkName').val();
-    const expiry = $('#expiry').val();
+    // Handle Create Link Form Submission
+    $('#createLinkForm').on('submit', function(e) {
+        e.preventDefault();
+        const longUrlDesktop = $('#longUrlDesktop').val();
+        const longUrlMobile = $('#longUrlMobile').val();
+        const shortCode = $('#shortCode').val();
+        const name = $('#linkName').val();
+        const expiry = $('#expiry').val();
+        const imageUrl = $('#imageUrl').val();
 
-    $.ajax({
-      url: '/links/create',
-      method: 'POST',
-      contentType: 'application/json',
-      data: JSON.stringify({ longUrlDesktop, longUrlMobile, name, expiry }),
-      success: function(response) {
-        $('#createLinkMessage').html(`<p class="success">${response.message}</p>`);
-        // Clear the form
-        $('#createLinkForm')[0].reset();
-        // Refresh the links table
-        fetchUserLinks();
-      },
-      error: function(err) {
-        const errors = err.responseJSON && err.responseJSON.errors
-          ? err.responseJSON.errors
-          : [{ msg: err.responseJSON.message || 'An error occurred.' }];
-        let errorHtml = '<ul>';
-        errors.forEach(error => {
-          errorHtml += `<li class="error">${error.msg}</li>`;
+        $.ajax({
+            url: '/links/create',
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({ 
+                longUrlDesktop, 
+                longUrlMobile, 
+                shortCode, 
+                name, 
+                expiry, 
+                imageUrl 
+            }),
+            success: function(response) {
+                $('#createLinkMessage').html(`<p class="success">${response.message}</p>`);
+                // Clear the form
+                $('#createLinkForm')[0].reset();
+                // Refresh the links table
+                fetchUserLinks();
+            },
+            error: function(err) {
+                const errors = err.responseJSON && err.responseJSON.errors
+                    ? err.responseJSON.errors
+                    : [{ msg: err.responseJSON.message || 'An error occurred.' }];
+                let errorHtml = '<ul>';
+                errors.forEach(error => {
+                    errorHtml += `<li class="error">${error.msg}</li>`;
+                });
+                errorHtml += '</ul>';
+                $('#createLinkMessage').html(errorHtml);
+            }
         });
-        errorHtml += '</ul>';
-        $('#createLinkMessage').html(errorHtml);
-      }
     });
-  });
 
-  // Function to fetch and display user's links
-  function fetchUserLinks() {
-    $.ajax({
-      url: '/links/my-links',
-      method: 'GET',
-      success: function(response) {
-        const links = response.links;
-        let rows = '';
-        links.forEach(link => {
-          rows += `
-            <tr>
-              <td><a href="${link.shortCode}" target="_blank">${window.location.origin}/${link.shortCode}</a></td>
-              <td><a href="${link.longUrlDesktop}" target="_blank">${link.longUrlDesktop}</a></td>
-              <td><a href="${link.longUrlMobile || '#'}" target="_blank">${link.longUrlMobile || 'N/A'}</a></td>
-              <td>${link.clicks || 0}</td>
-              <td>${new Date(link.createdAt).toLocaleString()}</td>
-              <td>${link.expiry ? new Date(link.expiry).toLocaleDateString() : 'N/A'}</td>
-              <td>
-                  <a href="analytics.html?linkId=${link.id}" class="btn btn-sm btn-info">View Analytics</a>
-              </td>
-            </tr>
-          `;
+    // Function to fetch and display user's links
+    function fetchUserLinks() {
+        $.ajax({
+            url: '/links/my-links',
+            method: 'GET',
+            success: function(response) {
+                const links = response.links;
+                let rows = '';
+                links.forEach(link => {
+                    rows += `
+                        <tr>
+                            <td><a href="${window.location.origin}/${link.shortCode}" target="_blank">${window.location.origin}/${link.shortCode}</a></td>
+                            <td><a href="${link.longUrlDesktop}" target="_blank">${link.longUrlDesktop}</a></td>
+                            <td>${link.clicks}</td>
+                            <td>${new Date(link.createdAt).toLocaleString()}</td>
+                            <td>${link.expiry ? new Date(link.expiry).toLocaleDateString() : 'N/A'}</td>
+                            <td>
+                                <a href="analytics.html?linkId=${link.id}" class="btn btn-sm btn-info"><i class="fas fa-chart-pie"></i> View Analytics</a>
+                            </td>
+                        </tr>
+                    `;
+                });
+                $('#linksTable tbody').html(rows);
+                $('#linksMessage').html('');
+            },
+            error: function(err) {
+                const errors = err.responseJSON && err.responseJSON.errors
+                    ? err.responseJSON.errors
+                    : [{ msg: err.responseJSON.message || 'Failed to fetch links.' }];
+                let errorHtml = '<ul>';
+                errors.forEach(error => {
+                    errorHtml += `<li class="error">${error.msg}</li>`;
+                });
+                errorHtml += '</ul>';
+                $('#linksMessage').html(errorHtml);
+            }
         });
-        $('#linksTable tbody').html(rows);
-        $('#linksMessage').html('');
-      },
-      error: function(err) {
-        const errorMsg = err.responseJSON && err.responseJSON.message
-          ? err.responseJSON.message
-          : 'Failed to fetch links.';
-        $('#linksMessage').html(`<p class="error">${errorMsg}</p>`);
-      }
-    });
-  }
+    }
 });
+

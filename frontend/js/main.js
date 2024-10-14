@@ -1,4 +1,4 @@
-/* js/main.js */
+// frontend/js/main.js
 
 $(document).ready(function() {
     // Highlight active navigation link

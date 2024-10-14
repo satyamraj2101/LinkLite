@@ -1,321 +1,107 @@
-<!-- analytics.html -->
-
+<!-- frontend/analytics.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Analytics - URL Shortener</title>
-  <link rel="stylesheet" href="css/styles.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LinkLite - Analytics</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Custom CSS -->
+    <link href="css/styles.css" rel="stylesheet">
 </head>
 <body>
-<!-- Navigation -->
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-  <a class="navbar-brand" href="dashboard.html">
-    <img src="images/logo.png" width="30" height="30" alt="Logo">
-    URL Shortener
-  </a>
-  <div class="collapse navbar-collapse">
-    <ul class="navbar-nav ml-auto">
-      <li class="nav-item">
-        <a class="nav-link" href="dashboard.html">Dashboard</a>
-      </li>
-      <li class="nav-item active">
-        <a class="nav-link" href="analytics.html">Analytics</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="about.html">About Me</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="#" id="logoutBtn">Logout</a>
-      </li>
-    </ul>
-  </div>
-</nav>
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="dashboard.html">LinkLite</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" 
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="dashboard.html">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="analytics.html">Analytics</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="profile.html">Profile</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="about.html">About</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link btn btn-danger text-white ms-2" href="#" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
 
-<!-- Analytics Content -->
-<div class="container">
-  <h2 class="mt-5">Link Analytics</h2>
+    <!-- Analytics Content -->
+    <div class="container mt-4">
+        <h2>Analytics Dashboard</h2>
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <label for="selectLink" class="form-label">Select Link</label>
+                <select class="form-select" id="selectLink">
+                    <!-- Options will be populated via AJAX -->
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label for="startDate" class="form-label">Start Date</label>
+                <input type="date" class="form-control" id="startDate">
+            </div>
+            <div class="col-md-3">
+                <label for="endDate" class="form-label">End Date</label>
+                <input type="date" class="form-control" id="endDate">
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+                <button class="btn btn-primary w-100" id="fetchAnalytics"><i class="fas fa-chart-pie"></i> Fetch Analytics</button>
+            </div>
+        </div>
 
-  <!-- Select Link -->
-  <div class="form-group">
-    <label for="selectLink">Select a Short Link</label>
-    <select class="form-control" id="selectLink">
-      <option value="">-- Select Link --</option>
-      <!-- Options will be populated dynamically -->
-    </select>
-  </div>
-
-  <!-- Date Filters -->
-  <div class="form-row">
-    <div class="form-group col-md-6">
-      <label for="startDate">Start Date</label>
-      <input type="date" class="form-control" id="startDate">
+        <div class="row">
+            <div class="col-md-12" id="chartsSection" style="display: none;">
+                <h4>Total Clicks: <span id="totalClicks"></span></h4>
+                <div class="row">
+                    <div class="col-md-6">
+                        <canvas id="clicksChart"></canvas>
+                    </div>
+                    <div class="col-md-6">
+                        <canvas id="geoChart"></canvas>
+                    </div>
+                </div>
+                <div class="row mt-4">
+                    <div class="col-md-6">
+                        <canvas id="deviceChart"></canvas>
+                    </div>
+                    <div class="col-md-6">
+                        <!-- Additional Charts or Data Can Be Added Here -->
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-    <div class="form-group col-md-6">
-      <label for="endDate">End Date</label>
-      <input type="date" class="form-control" id="endDate">
-    </div>
-  </div>
 
-  <!-- Fetch Analytics Button -->
-  <button id="fetchAnalytics" class="btn btn-primary mb-4">Fetch Analytics</button>
+    <!-- Footer -->
+    <footer class="bg-dark text-white mt-5 p-4 text-center">
+        &copy; 2024 LinkLite. All rights reserved.
+    </footer>
 
-  <!-- Charts -->
-  <div class="card">
-    <div class="card-header">
-      Clicks Over Time
-    </div>
-    <div class="card-body">
-      <canvas id="clicksChart"></canvas>
-    </div>
-  </div>
-
-  <div class="card mt-4">
-    <div class="card-header">
-      Geographical Distribution
-    </div>
-    <div class="card-body">
-      <canvas id="geoChart"></canvas>
-    </div>
-  </div>
-
-  <div class="card mt-4">
-    <div class="card-header">
-      Device Types
-    </div>
-    <div class="card-body">
-      <canvas id="deviceChart"></canvas>
-    </div>
-  </div>
-</div>
-
-<!-- Footer -->
-<footer>
-  <p>&copy; 2024 Your Name. All rights reserved.</p>
-</footer>
-
-<!-- Scripts -->
-<script>
-  $(document).ready(function () {
-    // Fetch links for the select dropdown
-    $.ajax({
-      url: '/auth/links',
-      method: 'GET',
-      success: function (data) {
-        const selectLink = $('#selectLink');
-        data.forEach(link => {
-          selectLink.append(`<option value="${link.id}">${link.short_url}</option>`);
-        });
-      },
-      error: function (error) {
-        console.error('Error fetching links:', error);
-      }
-    });
-
-    // Handle fetch analytics
-    $('#fetchAnalytics').click(function () {
-      const linkId = $('#selectLink').val();
-      const startDate = $('#startDate').val();
-      const endDate = $('#endDate').val();
-
-      $.ajax({
-        url: `/links/${linkId}/analytics`,
-        method: 'POST',
-        contentType: 'application/json',
-        data: JSON.stringify({ startDate, endDate }),
-        success: function (analytics) {
-          // Handle displaying the analytics charts
-          console.log('Analytics:', analytics);
-          // Call your function to render charts using the analytics data
-          renderCharts(analytics);
-        },
-        error: function (error) {
-          console.error('Error fetching analytics:', error);
-        }
-      });
-    });
-  });
-
-  function renderCharts(data) {
-    // Implement your chart rendering logic here
-  }
-
-  $(document).ready(function() {
-    let clicksChart, geoChart, deviceChart;
-
-    // Fetch user's links to populate the select dropdown
-    fetchUserLinks();
-
-    // Handle Fetch Analytics Button Click
-    $('#fetchAnalytics').on('click', function() {
-      const linkId = $('#selectLink').val();
-      const startDate = $('#startDate').val();
-      const endDate = $('#endDate').val();
-
-      if (!linkId) {
-        alert('Please select a link.');
-        return;
-      }
-
-      fetchAnalytics(linkId, startDate, endDate);
-    });
-
-    // Function to fetch user's links
-    function fetchUserLinks() {
-      $.ajax({
-        url: '/links/my-links',
-        method: 'GET',
-        success: function(response) {
-          const links = response.links;
-          let options = '<option value="">-- Select Link --</option>';
-          links.forEach(link => {
-            options += `<option value="${link.id}">${link.name || link.shortCode}</option>`;
-          });
-          $('#selectLink').html(options);
-        },
-        error: function(err) {
-          alert('Failed to fetch links.');
-        }
-      });
-    }
-
-    // Function to fetch and display analytics
-    function fetchAnalytics(linkId, startDate, endDate) {
-      let url = `/links/${linkId}/analytics?limit=1000`;
-      if (startDate) url += `&startDate=${startDate}`;
-      if (endDate) url += `&endDate=${endDate}`;
-
-      $.ajax({
-        url: url,
-        method: 'GET',
-        success: function(response) {
-          const clicks = response.clicks;
-          // Prepare data for charts
-          prepareCharts(clicks);
-        },
-        error: function(err) {
-          alert('Failed to fetch analytics.');
-        }
-      });
-    }
-
-    // Function to prepare and render charts
-    function prepareCharts(clicks) {
-      // Clicks Over Time
-      const clicksByDate = {};
-      clicks.forEach(click => {
-        const date = new Date(click.clicked_at).toLocaleDateString();
-        clicksByDate[date] = (clicksByDate[date] || 0) + 1;
-      });
-      const dates = Object.keys(clicksByDate).sort((a, b) => new Date(a) - new Date(b));
-      const clicksData = dates.map(date => clicksByDate[date]);
-
-      if (clicksChart) clicksChart.destroy();
-      const ctx1 = document.getElementById('clicksChart').getContext('2d');
-      clicksChart = new Chart(ctx1, {
-        type: 'line',
-        data: {
-          labels: dates,
-          datasets: [{
-            label: 'Clicks Over Time',
-            data: clicksData,
-            backgroundColor: 'rgba(54, 162, 235, 0.2)',
-            borderColor: 'rgba(54, 162, 235, 1)',
-            borderWidth: 1,
-            fill: true,
-          }]
-        },
-        options: {
-          responsive: true,
-        }
-      });
-
-      // Geographical Distribution
-      const geoCounts = {};
-      clicks.forEach(click => {
-        const country = click.country || 'Unknown';
-        geoCounts[country] = (geoCounts[country] || 0) + 1;
-      });
-      const geoLabels = Object.keys(geoCounts);
-      const geoData = Object.values(geoCounts);
-
-      if (geoChart) geoChart.destroy();
-      const ctx2 = document.getElementById('geoChart').getContext('2d');
-      geoChart = new Chart(ctx2, {
-        type: 'bar',
-        data: {
-          labels: geoLabels,
-          datasets: [{
-            label: 'Clicks by Country',
-            data: geoData,
-            backgroundColor: 'rgba(255, 99, 132, 0.2)',
-            borderColor:'rgba(255,99,132,1)',
-            borderWidth:1
-          }]
-        },
-        options: {
-          responsive: true,
-          scales: {
-            x: {
-              ticks: { autoSkip: false },
-              title: { display: true, text: 'Country' }
-            },
-            y: {
-              beginAtZero: true,
-              title: { display: true, text: 'Number of Clicks' }
-            }
-          }
-        }
-      });
-
-      // Device Types
-      const deviceCounts = {};
-      clicks.forEach(click => {
-        const device = click.device_type || 'Unknown';
-        deviceCounts[device] = (deviceCounts[device] || 0) + 1;
-      });
-      const deviceLabels = Object.keys(deviceCounts);
-      const deviceData = Object.values(deviceCounts);
-
-      if (deviceChart) deviceChart.destroy();
-      const ctx3 = document.getElementById('deviceChart').getContext('2d');
-      deviceChart = new Chart(ctx3, {
-        type: 'pie',
-        data: {
-          labels: deviceLabels,
-          datasets: [{
-            label: 'Device Types',
-            data: deviceData,
-            backgroundColor: [
-              'rgba(255, 99, 132, 0.6)',
-              'rgba(54, 162, 235, 0.6)',
-              'rgba(255, 206, 86, 0.6)',
-              'rgba(75, 192, 192, 0.6)',
-              'rgba(153, 102, 255, 0.6)'
-            ],
-            borderColor: [
-              'rgba(255,99,132,1)',
-              'rgba(54, 162, 235, 1)',
-              'rgba(255, 206, 86, 1)',
-              'rgba(75, 192, 192, 1)',
-              'rgba(153, 102, 255, 1)'
-            ],
-            borderWidth: 1
-          }]
-        },
-        options: {
-          responsive: true,
-        }
-      });
-    }
-  });
-
-</script>
-
-<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="js/analytics.js"></script>
-<script src="js/main.js"></script>
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Custom JS -->
+    <script src="js/analytics.js"></script>
+    <script src="js/main.js"></script>
 </body>
 </html>

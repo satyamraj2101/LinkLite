@@ -87,10 +87,15 @@ const linkRepository = {
      */
     async getLinksByUser(userId) {
         const query = `
-            SELECT * FROM links WHERE created_by = $1 ORDER BY created_at DESC
-        `;
-        const result = await pool.query(query, [userId]);
-        return result.rows;
+        SELECT l.*, COUNT(la.id) as click_count
+        FROM links l
+        LEFT JOIN link_analytics la ON l.id = la.link_id
+        WHERE l.created_by = $1
+        GROUP BY l.id
+        ORDER BY l.created_at DESC
+    `;
+    const result = await pool.query(query, [userId]);
+    return result.rows;
     },
 };
 
@@ -289,6 +294,7 @@ exports.getUserLinks = async (req, res) => {
                 expiry: link.expiry,
                 imageUrl: link.image_url,
                 createdAt: link.created_at,
+                clicks: parseInt(link.click_count, 10) || 0, // Ensure this is correctly parsed
             })),
         });
     } catch (error) {
@@ -296,7 +302,6 @@ exports.getUserLinks = async (req, res) => {
         res.status(500).json({ message: 'Server error' });
     }
 };
-
 /**
  * Redirects to the appropriate long URL based on device type.
  * Logs analytics data.
