@@ -1,3 +1,6 @@
+repo: https://github.com/satyamraj2101/linklite.git
+branch: main
+
 services:
   - type: web
     name: linklite-backend
@@ -38,13 +41,12 @@ services:
         value: production
     buildCommand: "cd backend && npm install"
     startCommand: "cd backend && node server.js"
+
   - type: static
     name: linklite-frontend
     plan: free
     staticPublishPath: ./frontend
-    buildFilter:
-      paths:
-      - frontend/**
+
 databases:
   - name: linklite-db
     plan: free
