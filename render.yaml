@@ -33,24 +33,18 @@ services:
       - key: COOKIE_SECRET
         generateValue: true
       - key: DOMAIN
-        fromService:
-          type: web
-          name: linklite-backend
-          property: url
+        value: linklite-backend.onrender.com
       - key: NODE_ENV
         value: production
     buildCommand: "cd backend && npm install"
     startCommand: "cd backend && node server.js"
-
-  - type: web
+  - type: static_site
     name: linklite-frontend
     plan: free
-    env: static
     staticPublishPath: ./frontend
     buildFilter:
       paths:
       - frontend/**
-
 databases:
   - name: linklite-db
     plan: free
