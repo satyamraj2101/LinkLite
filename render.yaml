@@ -36,7 +36,7 @@ services:
         fromService:
           type: web
           name: linklite-backend
-          property: hostport
+          property: url
       - key: NODE_ENV
         value: production
     build: |
@@ -48,11 +48,10 @@ services:
   - type: static
     name: linklite-frontend
     plan: free
-    publishPath: ./frontend
+    staticPublishPath: ./frontend
     buildFilter:
       paths:
       - frontend/**
-
 databases:
   - name: linklite-db
     plan: free
