@@ -1,6 +1,3 @@
-repo: https://github.com/satyamraj2101/linklite.git
-branch: main
-
 services:
   - type: web
     name: linklite-backend
@@ -9,7 +6,7 @@ services:
     healthCheckPath: /
     buildFilter:
       paths:
-      - backend/**
+        - backend/**
     envVars:
       - key: DB_USER
         fromDatabase:
@@ -42,8 +39,9 @@ services:
     buildCommand: "cd backend && npm install"
     startCommand: "cd backend && node server.js"
 
-  - type: static
+  - type: web
     name: linklite-frontend
+    env: static
     plan: free
     staticPublishPath: ./frontend
 
