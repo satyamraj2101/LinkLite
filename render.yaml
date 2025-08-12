@@ -39,19 +39,18 @@ services:
           property: url
       - key: NODE_ENV
         value: production
-    build: |
-      cd backend
-      npm install
-    start: |
-      cd backend
-      node server.js
-  - type: static
+    buildCommand: "cd backend && npm install"
+    startCommand: "cd backend && node server.js"
+
+  - type: web
     name: linklite-frontend
     plan: free
+    env: static
     staticPublishPath: ./frontend
     buildFilter:
       paths:
       - frontend/**
+
 databases:
   - name: linklite-db
     plan: free
