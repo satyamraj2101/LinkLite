@@ -38,7 +38,7 @@ services:
         value: production
     buildCommand: "cd backend && npm install"
     startCommand: "cd backend && node server.js"
-  - type: static_site
+  - type: static
     name: linklite-frontend
     plan: free
     staticPublishPath: ./frontend
