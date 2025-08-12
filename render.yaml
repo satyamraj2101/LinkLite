@@ -1,0 +1,56 @@
+repo: https://github.com/satyamraj2101/linklite.git
+branch: main
+
+services:
+  - type: web
+    name: linklite-backend
+    env: node
+    plan: free
+    healthCheckPath: /
+    envVars:
+      - key: DB_USER
+        fromDatabase:
+          name: linklite-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: linklite-db
+          property: password
+      - key: DB_HOST
+        fromDatabase:
+          name: linklite-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: linklite-db
+          property: port
+      - key: DB_NAME
+        fromDatabase:
+          name: linklite-db
+          property: database
+      - key: JWT_SECRET
+        generateValue: true
+      - key: COOKIE_SECRET
+        generateValue: true
+      - key: DOMAIN
+        value: linklite-backend.onrender.com
+      - key: NODE_ENV
+        value: production
+    build: |
+      cd backend
+      npm install
+    start: |
+      cd backend
+      node server.js
+
+  - type: static_site
+    name: linklite-frontend
+    plan: free
+    publishDir: frontend
+
+  - type: db
+    name: linklite-db
+    plan: free
+    databaseName: linklite
+    databaseUser: linklite
+    postgresMajorVersion: 14
