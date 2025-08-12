@@ -1,8 +1,8 @@
 services:
+  # Backend Service
   - type: web
     name: linklite-backend
     env: node
-    plan: free
     healthCheckPath: /
     buildFilter:
       paths:
@@ -39,12 +39,17 @@ services:
     buildCommand: "cd backend && npm install"
     startCommand: "cd backend && node server.js"
 
+  # Frontend Service
   - type: web
     name: linklite-frontend
     env: static
-    plan: free
-    staticPublishPath: ./frontend
+    buildCommand: "cd frontend && npm install && npm run build"
+    staticPublishPath: ./frontend/dist
+    buildFilter:
+      paths:
+        - frontend/**
 
+# Database
 databases:
   - name: linklite-db
     plan: free
